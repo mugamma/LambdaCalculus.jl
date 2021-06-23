@@ -4,5 +4,5 @@ env:
   - CODECOV_TOKEN='1ecf291d-d874-4f03-9574-847286d58209'
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - julia -e 'using Coverage; Codecov.submit(Codecov.process_folder())'
 
