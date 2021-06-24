@@ -1,6 +1,6 @@
 using Test
 
-include("lambda_tests.jl")
+include("terms_tests.jl")
 
 
 

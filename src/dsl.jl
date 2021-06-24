@@ -10,6 +10,13 @@ macro constant(names...)
     definition_macro_builder(names, Constant)
 end=#
 
+struct VariableReference
+    name::Symbol
+end
+
+annotate(v::VariableReference, t::LambdaType) = Variable(v.name, t)
+Base.getindex(v::VariableReference, t::LambdaType) = Variable(v.name, t)
+
 lambda(var::Variable, body::LambdaTerm) = Abstraction(var, body)
 
 lambda(var::Symbol, body::LambdaTerm) = lambda(Variable(var), body)
