@@ -1,8 +1,25 @@
+#################
+# α-equivalence #
+#################
+
+alpha_equivalent(v::Identifier, u::Identifier) = v == u
+
+alpha_equivalent(f::DeBrujinAbstraction, g::DeBrujinAbstraction) = f == g
+
+alpha_equivalent(f::NamedAbstraction, g::NamedAbstraction) = 
+    named_to_debrujin(f) == named_to_debrujin(g)
+
+alpha_equivalent(s::Application, t::Application) =
+    alpha_equivalent(operator(s), operator(t)) &&
+    alpha_equivalent(operand(s), operand(t))
+
+≃(x, y) = alpha_equivalent(x, y)
+
 ################
 # α-conversion #
 ################
 
-function alpha_convert(abs::Abstraction, new_var::Variable)
+#=function alpha_convert(abs::NamedAbstraction, new_var::Variable)
     if !(new_var in free_vars(abs)) && !(new_var in bound_vars(abs))
         rename_var(abs, var(abs), new_var)
     else
@@ -20,37 +37,7 @@ rename_var(abs::Abstraction, from::Variable, to::Variable) =
     lambda(rename_var(var(abs), from, to), rename_var(body(abs), from , to))
 
 rename_var(app::Application, from::Variable, to::Variable) = 
-    rename_var(operator(app), from, to)(rename_var(operand(app), from, to));
-
-#################
-# α-equivalence #
-#################
-
-function random_neither_free_nor_bound_var(terms::Vararg{LambdaTerm, N}) where N
-    unacceptable_vars = union(map(free_vars, terms), map(bound_vars, terms))
-    n = rand(Int)
-    while Variable(Symbol('#', n)) in unacceptable_vars
-        n = rand(Int)
-    end
-    Variable(Symbol('#', n))
-end
-
-alpha_equivalent(v::Identifier, u::Identifier) = v == u
-
-function alpha_equivalent(f::Abstraction, g::Abstraction)
-    new_arg = random_neither_free_nor_bound_var(f, g)
-    alpha_equivalent(body(alpha_convert(f, new_arg)),
-                     body(alpha_convert(g, new_arg)))
-end
-
-alpha_equivalent(s::Application, t::Application) =
-    alpha_equivalent(operator(s), operator(t)) &&
-    alpha_equivalent(operand(s), operand(t))
-
-# XXX risky! add tests
-alpha_equivalent(s::LambdaTerm, t::Union{LambdaTerm,Nothing}) = false
-
-≃(x, y) = alpha_equivalent(x, y)
+    rename_var(operator(app), from, to)(rename_var(operand(app), from, to));=#
 
 
 ###############
@@ -88,7 +75,6 @@ end
 ###############
 # η-reduction #
 ###############
-
 
 function is_eta_redex(abs::Abstraction)
     body(abs) isa Application && var(abs) == operand(body(abs)) 

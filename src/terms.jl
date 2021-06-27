@@ -82,22 +82,22 @@ operand(app::Application) = app.operand
 type(app::Application) = target(type(operator(app)))
 
 
-#=free_vars(var::Variable) = Set{Variable}((var,))
+free_vars(var::Variable) = Set{Variable}((var,))
 
 free_vars(constant::Constant) = Set{Variable}()
 
-free_vars(abs::Abstraction) = setdiff(free_vars(body(abs)), (var(abs),))
+free_vars(abs::NamedAbstraction) = setdiff(free_vars(body(abs)), (var(abs),))
 
 free_vars(app::Application) = union(free_vars(operator(app)),
                                     free_vars(operand(app)))
 
 bound_vars(var::Identifier) = Set{Variable}()
 
-bound_vars(abs::Abstraction) = union(bound_vars(body(abs)), (var(abs),))
+bound_vars(abs::NamedAbstraction) = union(bound_vars(body(abs)), (var(abs),))
 
 bound_vars(app::Application) = union(bound_vars(operator(app)),
                                      bound_vars(operand(app)))
 
-all_vars(term::LambdaTerm) = union(free_vars(term), bound_vars(term))=#
+all_vars(term::LambdaTerm) = union(free_vars(term), bound_vars(term))
 
 
