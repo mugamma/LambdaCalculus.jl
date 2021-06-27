@@ -1,10 +1,7 @@
-include("../src/LambdaCalculus.jl")
-
 import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
                        Constant, Variable, VariableReference, annotate,
-                       Abstraction, var, body, Application, operator, operand,
-                       LambdaTypeError
-
+                       NamedAbstraction, var, body, Application, operator,
+                       operand, LambdaTypeError
 
 @testset "lambda terms" begin
     ind_t = AtomicType(:ind)
@@ -41,10 +38,10 @@ import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
         @test type(truth) == bool_t
     end
 
-    self = Abstraction(person, person)
-    is_mortal = Abstraction(person, true_)
+    self = NamedAbstraction(person, person)
+    is_mortal = NamedAbstraction(person, true_)
 
-    @testset "abstractions" begin
+    @testset "named abstractions" begin
         @test var(self) == person
         @test body(self) == person
         @test type(self) == ArrowType(ind_t, ind_t)
@@ -66,6 +63,23 @@ import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
         @test operator(socrates_is_mortal) == is_mortal
         @test operand(socrates_is_mortal) == socrates
         @test type(socrates_is_mortal) == bool_t
+    end
+
+    @testset "combinators" begin
+        arr_t = ArrowType(ind_t, ind_t)
+        arr2_t = ArrowType(ind_t, ArrowType(ind_t, ind_t))
+        x, y, z = map(s->Variable(s, ind_t), (:x, :y, :z))
+        f = Variable(:f, arr2_t)
+        g = Variable(:g, arr_t)
+
+        I = NamedAbstraction(x, x)
+        K = NamedAbstraction(x, NamedAbstraction(y, x))
+        S = NamedAbstraction(f, NamedAbstraction(g, NamedAbstraction(z, 
+               Application(Application(f, z), Application(g, z)))))
+
+        @test type(I) == arr_t
+        @test type(K) == arr2_t
+        @test type(S) == ArrowType(arr2_t, ArrowType(arr_t, arr_t))
     end
 end
 

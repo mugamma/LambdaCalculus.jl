@@ -43,14 +43,16 @@ type(identifier::Identifier) = identifier.type
 # Abstraction #
 ###############
 
-struct Abstraction <: LambdaTerm
+abstract type Abstraction <: LambdaTerm end
+
+struct NamedAbstraction <: Abstraction
     var::Variable
     body::LambdaTerm
 end
 
-var(abs::Abstraction) = abs.var
-body(abs::Abstraction) = abs.body
-type(abs::Abstraction) = ArrowType(type(var(abs)), type(body(abs)))
+var(abs::NamedAbstraction) = abs.var
+body(abs::NamedAbstraction) = abs.body
+type(abs::NamedAbstraction) = ArrowType(type(var(abs)), type(body(abs)))
 
 ###############
 # Application #
@@ -59,7 +61,6 @@ type(abs::Abstraction) = ArrowType(type(var(abs)), type(body(abs)))
 struct LambdaTypeError <: Exception
     msg::String
 end
-
 
 struct Application <: LambdaTerm
     operator::LambdaTerm
