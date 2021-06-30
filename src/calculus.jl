@@ -6,7 +6,7 @@ alpha_equivalent(v::Identifier, u::Identifier) = v == u
 
 alpha_equivalent(f::DeBrujinAbstraction, g::DeBrujinAbstraction) = f == g
 
-alpha_equivalent(f::NamedAbstraction, g::NamedAbstraction) = 
+alpha_equivalent(f::Abstraction, g::Abstraction) = 
     named_to_debrujin(f) == named_to_debrujin(g)
 
 alpha_equivalent(s::Application, t::Application) =

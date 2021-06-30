@@ -43,16 +43,15 @@ type(identifier::Identifier) = identifier.type
 # Abstraction #
 ###############
 
-abstract type Abstraction <: LambdaTerm end
 
-struct NamedAbstraction <: Abstraction
+struct Abstraction <: LambdaTerm 
     var::Variable
     body::LambdaTerm
 end
 
-var(abs::NamedAbstraction) = abs.var
-body(abs::NamedAbstraction) = abs.body
-type(abs::NamedAbstraction) = ArrowType(type(var(abs)), type(body(abs)))
+var(abs::Abstraction) = abs.var
+body(abs::Abstraction) = abs.body
+type(abs::Abstraction) = ArrowType(type(var(abs)), type(body(abs)))
 
 ###############
 # Application #
@@ -86,14 +85,14 @@ free_vars(var::Variable) = Set{Variable}((var,))
 
 free_vars(constant::Constant) = Set{Variable}()
 
-free_vars(abs::NamedAbstraction) = setdiff(free_vars(body(abs)), (var(abs),))
+free_vars(abs::Abstraction) = setdiff(free_vars(body(abs)), (var(abs),))
 
 free_vars(app::Application) = union(free_vars(operator(app)),
                                     free_vars(operand(app)))
 
 bound_vars(var::Identifier) = Set{Variable}()
 
-bound_vars(abs::NamedAbstraction) = union(bound_vars(body(abs)), (var(abs),))
+bound_vars(abs::Abstraction) = union(bound_vars(body(abs)), (var(abs),))
 
 bound_vars(app::Application) = union(bound_vars(operator(app)),
                                      bound_vars(operand(app)))

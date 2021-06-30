@@ -1,6 +1,6 @@
 import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
                        Constant, Variable, VariableReference, annotate,
-                       NamedAbstraction, var, body, Application, operator,
+                       Abstraction, var, body, Application, operator,
                        operand, LambdaTypeError
 
 @testset "lambda terms" begin
@@ -38,8 +38,8 @@ import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
         @test type(truth) == bool_t
     end
 
-    self = NamedAbstraction(person, person)
-    is_mortal = NamedAbstraction(person, true_)
+    self = Abstraction(person, person)
+    is_mortal = Abstraction(person, true_)
 
     @testset "named abstractions" begin
         @test var(self) == person
@@ -72,9 +72,9 @@ import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
         f = Variable(:f, arr2_t)
         g = Variable(:g, arr_t)
 
-        I = NamedAbstraction(x, x)
-        K = NamedAbstraction(x, NamedAbstraction(y, x))
-        S = NamedAbstraction(f, NamedAbstraction(g, NamedAbstraction(z, 
+        I = Abstraction(x, x)
+        K = Abstraction(x, Abstraction(y, x))
+        S = Abstraction(f, Abstraction(g, Abstraction(z, 
                Application(Application(f, z), Application(g, z)))))
 
         @test type(I) == arr_t

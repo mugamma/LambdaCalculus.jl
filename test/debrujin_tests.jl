@@ -1,8 +1,8 @@
 
-import LambdaCalculus: AtomicType, ArrowType, Variable, NamedAbstraction,
+import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
                        named_to_debrujin, debrujin_to_named, source_type, body,
                        type, DeBrujinIndex, DeBrujinAbstraction,
-                       alpha_equivalent
+                       DeBrujinApplication, alpha_equivalent
 
 @testset "De Brujin Indexing Tests" begin
     ind_t = AtomicType(:ind)
@@ -12,9 +12,9 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, NamedAbstraction,
     f = Variable(:f, arr2_t)
     g = Variable(:g, arr_t)
 
-    I = NamedAbstraction(x, x)
-    K = NamedAbstraction(x, NamedAbstraction(y, x))
-    S = NamedAbstraction(f, NamedAbstraction(g, NamedAbstraction(z, 
+    I = Abstraction(x, x)
+    K = Abstraction(x, Abstraction(y, x))
+    S = Abstraction(f, Abstraction(g, Abstraction(z, 
            Application(Application(f, z), Application(g, z)))))
     dI, dK, dS = map(named_to_debrujin, (I, K, S))
 
@@ -35,19 +35,19 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, NamedAbstraction,
         @test dS == DeBrujinAbstraction(arr2_t, 
                       DeBrujinAbstraction(arr_t, 
                         DeBrujinAbstraction(ind_t,
-                          Application(Application(_3, _1),
-                                      Application(_2, _1)))))
+                          DeBrujinApplication(DeBrujinApplication(_3, _1),
+                                              DeBrujinApplication(_2, _1)))))
         @test type(dS) == ArrowType(arr2_t, ArrowType(arr_t, arr_t))
     end
 
     @testset "alpha-equivalence" begin
         bool_t = AtomicType(:bool)
         is_behind = Constant(:is_behind, ArrowType(ind_t, ArrowType(ind_t, bool_t)))
-        @test alpha_equivalent(I, NamedAbstraction(y, y)) 
-        @test alpha_equivalent(K, NamedAbstraction(y, NamedAbstraction(x, y)))
-        @test alpha_equivalent(NamedAbstraction(x, NamedAbstraction(y,
+        @test alpha_equivalent(I, Abstraction(y, y)) 
+        @test alpha_equivalent(K, Abstraction(y, Abstraction(x, y)))
+        @test alpha_equivalent(Abstraction(x, Abstraction(y,
                                    Application(Application(is_behind, x), y))),
-                               NamedAbstraction(y, NamedAbstraction(x,
+                               Abstraction(y, Abstraction(x,
                                    Application(Application(is_behind, y), x))))
     end
 
