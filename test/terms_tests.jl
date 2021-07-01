@@ -3,6 +3,9 @@
                            Constant, Variable, VariableReference, annotate,
                            Abstraction, var, body, Application, operator,
                            operand, LambdaTypeError
+   
+    empty!(identifiers(GLOBAL_CONTEXT))
+
     ind_t = AtomicType(:ind)
     bool_t = AtomicType(:bool)
     @testset "atomic types" begin
