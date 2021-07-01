@@ -1,9 +1,12 @@
 import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
                        Constant, Variable, VariableReference, annotate,
                        Abstraction, var, body, Application, operator,
-                       operand, LambdaTypeError
+                       operand, LambdaTypeError, GLOBAL_CONTEXT, identifiers
 
 @testset "lambda terms" begin
+    
+    empty!(identifiers(GLOBAL_CONTEXT))
+
     ind_t = AtomicType(:ind)
     bool_t = AtomicType(:bool)
     @testset "atomic types" begin
