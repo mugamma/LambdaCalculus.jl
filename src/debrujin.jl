@@ -13,7 +13,6 @@ end
 idx(idx::DeBrujinIndex) = idx.i
 type(idx::DeBrujinIndex) = idx.type
 context(idx::DeBrujinIndex) = idx.context
-incr(i::DeBrujinIndex) = DeBrujinIndex(idx(i) + 1, type(i), context(i))
 
 struct DeBrujinAbstraction <: DeBrujinLambdaTerm
     source_type::LambdaType
@@ -38,9 +37,9 @@ struct DeBrujinApplication <: DeBrujinLambdaTerm
            type(operand) == source(type(operator))
             new(operator, operand, context)
         else
-            throw(LambdaTypeError("type mismatch: expected " *
-                                  "$(source(type(operator)))" *
-                                  " got $(type(operand))"))
+#            throw(LambdaTypeError("type mismatch: expected " *
+#                                  "$(source(type(operator)))" *
+#                                  " got $(type(operand))"))
         end
     end
 end
@@ -74,8 +73,24 @@ _named_to_debrujin(app::Application, subs::Dict{<:Identifier,DeBrujinIndex}) =
     DeBrujinApplication(_named_to_debrujin(operator(app), subs),
                         _named_to_debrujin(operand(app), subs), context(app))
 function _named_to_debrujin(abs::Abstraction, subs::Dict{<:Identifier,DeBrujinIndex})
-    new_subs = Dict(zip(keys(subs), map(incr, values(subs))))
+    new_subs = Dict(k => v + 1 for (k, v) in subs)
     new_subs[var(abs)] = DeBrujinIndex(1, source(type(abs)), context(var(abs)))
     DeBrujinAbstraction(source(type(abs)), _named_to_debrujin(body(abs), new_subs),
                         context(abs))
 end
+
+Base.:+(i::DeBrujinIndex, j::Int) = DeBrujinIndex(idx(i) + j, type(i), context(i))
+Base.:+(app::DeBrujinApplication, j::Int) =
+    DeBrujinApplication(operator(app) + j, operand(app) + j, context(app))
+function Base.:+(abs::DeBrujinAbstraction, j::Int)
+    add_free(i::DeBrujinIndex, j, depth) = idx(i) > depth ? i + j : i
+    add_free(app::DeBrujinApplication, j, depth) =
+        DeBrujinApplication(add_free(operator(app), j, depth),
+                            add_free(operand(app), j, depth), context(abs))
+    add_free(abs::DeBrujinAbstraction, j, depth) =
+        add_free(body(abs), j, depth + 1)
+    add_free(abs, j, 1)
+end
+Base.:+(j::Int, i::DeBrujinLambdaTerm) = i + j
+Base.:-(i::DeBrujinLambdaTerm, j::Int) = i + (-j)
+Base.:-(j::Int, i::DeBrujinLambdaTerm) = i - j
