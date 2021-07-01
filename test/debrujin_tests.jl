@@ -28,6 +28,11 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
     _4 = DeBrujinIndex(4, arr2_t, GLOBAL_CONTEXT)
     _5 = DeBrujinIndex(5, arr_t, GLOBAL_CONTEXT)
 
+    dbi(n, t) = DeBrujinIndex(n, t, GLOBAL_CONTEXT)
+    dbabs(st, b) = DeBrujinAbstraction(st, b, GLOBAL_CONTEXT)
+    dbapp(opr, opd) = DeBrujinApplication(opr, opd, GLOBAL_CONTEXT)
+
+
     @testset "converting from named to indexed" begin
         @test named_to_debrujin(x) isa DeBrujinIndex
         @test type(named_to_debrujin(x)) == ind_t
@@ -46,19 +51,12 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
         @test type(dI) == ArrowType(ind_t, ind_t)
 
         @test source_type(dK) == ind_t
-        @test body(dK) == DeBrujinAbstraction(ind_t, _2, GLOBAL_CONTEXT)
+        @test body(dK) == dbabs(ind_t, _2)
         @test type(dK) == ArrowType(ind_t, ArrowType(ind_t, ind_t))
 
-        _3 = DeBrujinIndex(3, arr2_t, GLOBAL_CONTEXT)
-        _2 = DeBrujinIndex(2, arr_t, GLOBAL_CONTEXT)
         @test source_type(dS) == arr2_t
-        @test dS == DeBrujinAbstraction(arr2_t, 
-                      DeBrujinAbstraction(arr_t, 
-                        DeBrujinAbstraction(ind_t,
-                          DeBrujinApplication(DeBrujinApplication(_3, _1, GLOBAL_CONTEXT),
-                                              DeBrujinApplication(_2, _1, GLOBAL_CONTEXT),
-                                             GLOBAL_CONTEXT),
-                          GLOBAL_CONTEXT), GLOBAL_CONTEXT), GLOBAL_CONTEXT)
+        @test dS == dbabs(arr2_t, dbabs(arr_t, dbabs(ind_t,
+                 dbapp(dbapp(dbi(3, arr2_t), _1), dbapp(dbi(2, arr_t), _1)))))
         @test type(dS) == ArrowType(arr2_t, ArrowType(arr_t, arr_t))
     end
 
@@ -88,5 +86,12 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
 
         @test type(nS) == type(S)
         @test alpha_equivalent(nS, S)
+    end
+
+    @testset "index shifting" begin
+        @test _1 + 2 == _3
+        @test _3 - 1 == _2
+        @test dI + 4 == dI
+        @test dgx + 4 == dbapp(dbi(9, arr_t), dbi(5, ind_t))
     end
 end
