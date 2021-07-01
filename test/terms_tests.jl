@@ -2,7 +2,8 @@
     import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
                            Constant, Variable, VariableReference, annotate,
                            Abstraction, var, body, Application, operator,
-                           operand, LambdaTypeError
+                           operand, LambdaTypeError, identifiers,
+                           GLOBAL_CONTEXT
    
     empty!(identifiers(GLOBAL_CONTEXT))
 
