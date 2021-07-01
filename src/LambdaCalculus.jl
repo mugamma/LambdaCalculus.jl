@@ -10,4 +10,6 @@ include("calculus.jl")
 
 include("misc.jl")
 
+include("io.jl")
+
 end # module LambdaCalculus

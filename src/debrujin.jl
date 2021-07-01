@@ -38,9 +38,9 @@ struct DeBrujinApplication <: DeBrujinLambdaTerm
            type(operand) == source(type(operator))
             new(operator, operand, context)
         else
-            #throw(LambdaTypeError("type mismatch: expected " *
-                                  #"$(source(type(operator)))" *
-                                  #" got $(type(operand))"))
+            throw(LambdaTypeError("type mismatch: expected " *
+                                  "$(source(type(operator)))" *
+                                  " got $(type(operand))"))
         end
     end
 end
@@ -49,8 +49,6 @@ operator(app::DeBrujinApplication) = app.operator
 operand(app::DeBrujinApplication) = app.operand
 context(app::DeBrujinApplication) = app.context
 type(app::DeBrujinApplication) = target(type(operator(app)))
-
-# XXX refactor?
 
 const VARORDER = [Symbol(c) for c in "xyzwuvpqrstabcdefghijklmno"]
 debrujin_to_named(t::DeBrujinLambdaTerm) = 
@@ -67,24 +65,6 @@ function _debrujin_to_named(abs::DeBrujinAbstraction, subs::Dict{Int,Identifier}
     Abstraction(new_var, _debrujin_to_named(body(abs), new_subs))
 end
 
-#=function debrujin_to_named(abs::DeBrujinAbstraction)
-    substitute_body(i::DeBrujinIndex, subs::IdxSubsType) = subs[idx(i)]
-    substitute_body(c::DeBrujinConstant, subs::IdxSubsType) = Constant(c)
-    substitute_body(app::DeBrujinApplication, subs::IdxSubsType) =
-        Application(substitute_body(operator(app), subs),
-                    substitute_body(operand(app), subs))
-    function substitute_body(abs::DeBrujinAbstraction, subs::IdxSubsType)
-        new_subs = Dict((k + 1) => v for (k, v) in subs)
-        new_subs[1] = Variable(VARORDER[length(subs)+1], source_type(abs))
-        Abstraction(new_subs[1],
-                         substitute_body(body(abs), new_subs))
-    end
-
-    init_subs = 
-    Abstraction(init_subs[1],
-                     substitute_body(body(abs), init_subs))
-end=#
-
 named_to_debrujin(t::LambdaTerm) = 
     _named_to_debrujin(t, Dict(v => DeBrujinIndex(i, type(v), context(v))
                                for (i, v) in enumerate(identifiers(context(t)))))
@@ -99,22 +79,3 @@ function _named_to_debrujin(abs::Abstraction, subs::Dict{<:Identifier,DeBrujinIn
     DeBrujinAbstraction(source(type(abs)), _named_to_debrujin(body(abs), new_subs),
                         context(abs))
 end
-    
-#=function named_to_debrujin(abs::Abstraction)
-    substitute_body(i::Variable, subs::NamedSubsType) = get(subs, name(i), i)
-    substitute_body(c::Constant, _::NamedSubsType) = DeBrujinConstant(c)
-    substitute_body(app::Application, subs::NamedSubsType) =
-        DeBrujinApplication(substitute_body(operator(app), subs),
-                            substitute_body(operand(app), subs))
-    function substitute_body(abs::Abstraction, subs::NamedSubsType)
-        new_subs = Dict(zip(keys(subs), map(incr, values(subs))))
-        new_subs[name(var(abs))] = DeBrujinIndex(1, source(type(abs)))
-        DeBrujinAbstraction(source(type(abs)),
-                            substitute_body(body(abs), new_subs))
-    end
-
-    init_subs = Dict(name(var(abs)) => DeBrujinIndex(1, source(type(abs))))
-    DeBrujinAbstraction(source(type(abs)),
-                        substitute_body(body(abs), init_subs))
-               
-end=#
