@@ -33,8 +33,11 @@ is_eta_redex(a::DeBrujinLambdaTerm) = false
 
 is_eta_redex(abs::DeBrujinAbstraction) =
     body(abs) isa DeBrujinApplication &&
-    operand(body(abs)) == DeBrujinIndex(1, source_type(abs))
+    operand(body(abs)) isa DeBrujinIndex &&
+    idx(operand(body(abs))) == 1 &&
+    type(operand(body(abs))) == source_type(abs)
 
 eta_reduce(t::LambdaTerm) = debrujin_to_named(eta_reduce(named_to_debrujin(t)))
 
-eta_reduce(t::DeBrujinAbstraction) = operator(body(t))
+eta_reduce(t::DeBrujinAbstraction) =
+    is_eta_redex(t) ? operator(body(t)) - 1 : t

@@ -2,14 +2,18 @@
 @testset "Reduction and Normalization Tests" begin
     import LambdaCalculus: AtomicType, ArrowType, Constant, Variable,
                            Abstraction, body, type, alpha_equivalent,
-                           is_eta_redex, eta_reduce, is_beta_redex, beta_reduce
+                           is_eta_redex, eta_reduce, is_beta_redex,
+                           GLOBAL_CONTEXT, identifiers, named_to_debrujin
+
+    empty!(identifiers(GLOBAL_CONTEXT))
+
     ind_t = AtomicType(:ind)
     fn_t = ArrowType(ind_t, ind_t)
     f = Constant(:f, fn_t)
     x = Variable(:x, ind_t)
 
     @testset "beta reduction" begin
-        @test_skip !is_beta_redex(Application(f, x))
+        @test !is_beta_redex(Application(f, x))
         @test !is_beta_redex(f)
         @test !is_beta_redex(Abstraction(x, x))
         @test is_beta_redex(Application(Abstraction(x, x), x))
