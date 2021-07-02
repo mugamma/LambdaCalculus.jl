@@ -57,10 +57,10 @@ const VARORDER = [Symbol(c) for c in "xyzwuvpqrstabcdefghijklmno"]
 debrujin_to_named(t::DeBrujinLambdaTerm) = 
     _debrujin_to_named(t, Dict(enumerate(identifiers(context(t)))))
 
-_debrujin_to_named(i::DeBrujinIndex, subs::Dict{Int,Identifier}) = subs[idx(i)]
-_debrujin_to_named(app::DeBrujinApplication, subs::Dict{Int,Identifier}) =
+_debrujin_to_named(i::DeBrujinIndex, subs::Dict{Int,<:Identifier}) = subs[idx(i)]
+_debrujin_to_named(app::DeBrujinApplication, subs::Dict{Int,<:Identifier}) =
     Application(map(f->_debrujin_to_named(f(app), subs), (operator, operand))...)
-function _debrujin_to_named(abs::DeBrujinAbstraction, subs::Dict{Int,Identifier})
+function _debrujin_to_named(abs::DeBrujinAbstraction, subs::Dict{Int,<:Identifier})
     used_vars = collect(map(name, values(subs)))
     new_var = Variable(VARORDER[findfirst(c->!(c in used_vars), VARORDER)],
                        source_type(abs))
