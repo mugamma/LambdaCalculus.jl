@@ -2,13 +2,28 @@
 # Construction Sugar #
 ######################
 
-#=macro variable(names...)
-    definition_macro_builder(names, Variable)
+macro atomic_type(names...)
+    clean_names = [split(string(name), ".")[end] for name in names]
+    Expr(:block,
+         [:($(esc(name)) = AtomicType(Symbol($clean_name)))
+          for (name, clean_name) in zip(names, clean_names)]...)
+end
+
+macro variable(tokens...)
+    names = map(token->token.args[1], tokens)
+    types = map(token->token.args[2], tokens)
+    Expr(:block,
+         [:($(esc(name)) = Variable(Symbol($(string(name))), $(esc(typ))))
+          for (name, typ) in zip(names, types)]...)
 end
 
 macro constant(names...)
-    definition_macro_builder(names, Constant)
-end=#
+    #definition_macro_builder(names, Constant)
+end
+
+≃(x, y) = alpha_equivalent(x, y)
+
+Base.Pair(s::LambdaType, t::LambdaType) = ArrowType(s, t)
 
 struct VariableReference
     name::Symbol
@@ -19,18 +34,7 @@ Base.getindex(v::VariableReference, t::LambdaType) = Variable(v.name, t)
 
 lambda(var::Variable, body::LambdaTerm) = Abstraction(var, body)
 
-lambda(var::Symbol, body::LambdaTerm) = lambda(Variable(var), body)
-
-lambda(var::Symbol, body::Symbol) = lambda(Variable(var), Variable(body))
+λ = lambda
 
 (operator::LambdaTerm)(operand::LambdaTerm) = Application(operator, operand)
-
-(operator::Symbol)(operand::LambdaTerm) = Variable(operator)(operand)
-
-(operator::LambdaTerm)(operand::Symbol) = operator(Variable(operand))
-
-(operator::Symbol)(operand::Symbol) = Variable(operator)(Variable(operand))
-
-apply(f::LambdaTerm, x::LambdaTerm) = f(x)
-
 

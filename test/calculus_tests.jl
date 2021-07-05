@@ -65,5 +65,7 @@
                                                      numerals[5])), numerals[8])
         @test alpha_equivalent(normalize(Application(Application(prod, numerals[2]),
                                                      numerals[3])), numerals[6])
+        @test alpha_equivalent(normalize(Application(Application(prod, numerals[2]),
+                                                     numerals[4])), numerals[8])
     end
 end
