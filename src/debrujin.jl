@@ -102,7 +102,7 @@ function Base.:+(abs::DeBrujinAbstraction, j::Int)
     add_free(abs::DeBrujinAbstraction, j, depth) =
         DeBrujinAbstraction(source_type(abs),
                             add_free(body(abs), j, depth + 1), context(abs))
-    add_free(abs, j, 1)
+    add_free(abs, j, 0)
 end
 Base.:+(j::Int, i::DeBrujinLambdaTerm) = i + j
 Base.:-(i::DeBrujinLambdaTerm, j::Int) = i + (-j)

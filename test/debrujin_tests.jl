@@ -92,6 +92,11 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
         @test _1 + 2 == _3
         @test _3 - 1 == _2
         @test dI + 4 == dI
+        _2 = DeBrujinIndex(2, arr_t, GLOBAL_CONTEXT)
+        _3 = DeBrujinIndex(3, arr_t, GLOBAL_CONTEXT)
+        s = dbabs(ind_t, dbapp(_2, dbapp(_2, _1)))
+        t = dbabs(ind_t, dbapp(_3, dbapp(_3, _1)))
+        @test s + 1 == t
         @test dgx + 4 == dbapp(dbi(9, arr_t), dbi(5, ind_t))
     end
 end

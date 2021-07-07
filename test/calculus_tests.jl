@@ -3,7 +3,8 @@
                            Abstraction, VariableReference, body, type,
                            alpha_equivalent, is_eta_redex, eta_reduce,
                            is_beta_redex, beta_reduce, GLOBAL_CONTEXT,
-                           identifiers, named_to_debrujin, normalize
+                           identifiers, named_to_debrujin, normalize,
+                           DeBrujinApplication
 
     empty!(identifiers(GLOBAL_CONTEXT))
 
@@ -30,8 +31,15 @@
              Application(Application(n, g), Application(g, x)))))
     add = Abstraction(n, Abstraction(m, Abstraction(g, Abstraction(x,
             Application(Application(m, g), Application(Application(n, g), x))))))
-    prod = Abstraction(n, Abstraction(m, Abstraction(g, Abstraction(x,
+    prod_nm = Abstraction(n, Abstraction(m, Abstraction(g, Abstraction(x,
                 Application(Application(n, Application(m, g)), x)))))
+    prod_mn = Abstraction(n, Abstraction(m, Abstraction(g, Abstraction(x,
+                Application(Application(m, Application(n, g)), x)))))
+
+    dnumerals = map(named_to_debrujin, numerals)
+    dprod_nm, dprod_mn = map(named_to_debrujin, (prod_nm, prod_mn))
+    
+    dba(f, x) = DeBrujinApplication(f, x, GLOBAL_CONTEXT)
 
     @testset "beta reduction" begin
         @test !is_beta_redex(Application(g, x))
@@ -60,10 +68,24 @@
         @test alpha_equivalent(normalize(Application(succ, numerals[1])), numerals[2])
         @test alpha_equivalent(normalize(Application(succ, numerals[2])), numerals[3])
         @test alpha_equivalent(normalize(Application(Application(add, numerals[2]),
-                                                     numerals[4])), numerals[6])
+                                                numerals[4])), numerals[6])
         @test alpha_equivalent(normalize(Application(Application(add, numerals[3]),
-                                                     numerals[5])), numerals[8])
-        @test alpha_equivalent(normalize(Application(Application(prod, numerals[2]),
-                                                     numerals[3])), numerals[6])
+                                                numerals[5])), numerals[8])
+        @test alpha_equivalent(normalize(Application(Application(prod_nm, numerals[2]),
+                                                numerals[3])), numerals[6])
+        @test alpha_equivalent(normalize(Application(Application(prod_nm, numerals[2]),
+                                                numerals[4])), numerals[8])
+        @test alpha_equivalent(normalize(Application(Application(prod_mn, numerals[2]),
+                                                numerals[3])), numerals[6])
+        @test_broken alpha_equivalent(normalize(Application(Application(prod_mn, numerals[2]),
+                                                numerals[4])), numerals[8])
+        @test alpha_equivalent(normalize(dba(dba(dprod_nm, dnumerals[2]),
+                                        dnumerals[3])), dnumerals[6])
+        @test alpha_equivalent(normalize(dba(dba(dprod_nm, dnumerals[2]),
+                                             dnumerals[4])), dnumerals[8])
+        @test alpha_equivalent(normalize(dba(dba(dprod_mn, dnumerals[2]),
+                                             dnumerals[3])), dnumerals[6])
+        @test alpha_equivalent(normalize(dba(dba(dprod_mn, dnumerals[2]),
+                                             dnumerals[4])), dnumerals[8])
     end
 end
