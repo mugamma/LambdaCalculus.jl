@@ -4,7 +4,7 @@ import LambdaCalculus: AtomicType, ArrowType, FreeVariable, BoundVariable,
                        source_type, body, type, FreeDeBrujinIndex,
                        BoundDeBrujinIndex, DeBrujinAbstraction, idx, context,
                        DeBrujinApplication, alpha_equivalent, GLOBAL_CONTEXT,
-                       free_vars
+                       free_vars, LambdaTypeError, check_context
 
 @testset "De Brujin Indexing Tests" begin
     ind_t = AtomicType(:ind)
@@ -37,6 +37,7 @@ import LambdaCalculus: AtomicType, ArrowType, FreeVariable, BoundVariable,
     _4 = dbi(4, arr2_t)
     _5 = dbi(5, arr_t)
 
+    @test_throws LambdaTypeError dbapp(_1, _2)
 
     @testset "converting from named to indexed" begin
         @test named_to_debrujin(fn) isa FreeDeBrujinIndex

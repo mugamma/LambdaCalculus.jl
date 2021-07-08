@@ -45,9 +45,8 @@ struct DeBrujinApplication <: DeBrujinLambdaTerm
            type(operand) == source(type(operator))
             new(operator, operand, context)
         else
-            #throw(LambdaTypeError("type mismatch: expected " *
-            #                      "$(source(type(operator)))" *
-            #                      " got $(type(operand))"))
+            throw(LambdaTypeError("type mismatch: $(type(operator)) " *
+                                  "applied to $(type(operand))"))
         end
     end
 end
