@@ -1,49 +1,54 @@
 
-import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
-                       named_to_debrujin, debrujin_to_named, source_type, body,
-                       type, DeBrujinIndex, DeBrujinAbstraction, idx, context,
+import LambdaCalculus: AtomicType, ArrowType, FreeVariable, BoundVariable,
+                       Abstraction, named_to_debrujin, debrujin_to_named,
+                       source_type, body, type, FreeDeBrujinIndex,
+                       BoundDeBrujinIndex, DeBrujinAbstraction, idx, context,
                        DeBrujinApplication, alpha_equivalent, GLOBAL_CONTEXT,
-                       identifiers
+                       free_vars
 
 @testset "De Brujin Indexing Tests" begin
     ind_t = AtomicType(:ind)
     arr_t = ArrowType(ind_t, ind_t)
     arr2_t = ArrowType(ind_t, ArrowType(ind_t, ind_t))
 
-    empty!(identifiers(GLOBAL_CONTEXT))
+    empty!(free_vars(GLOBAL_CONTEXT))
 
-    x, y, z = map(s->Variable(s, ind_t), (:x, :y, :z))
-    f = Variable(:f, arr2_t)
-    g = Variable(:g, arr_t)
+    x, y, z = map(s->BoundVariable(s, ind_t), (:x, :y, :z))
+    f = BoundVariable(:f, arr2_t)
+    g = BoundVariable(:g, arr_t)
 
-    gx = Application(g, x)
+    fn = FreeVariable(:fn, arr_t)
+    pt = FreeVariable(:pt, ind_t)
+
+    fnpt = Application(fn, pt)
     I = Abstraction(x, x)
     K = Abstraction(x, Abstraction(y, x))
     S = Abstraction(f, Abstraction(g, Abstraction(z, 
            Application(Application(f, z), Application(g, z)))))
-    dgx = named_to_debrujin(gx)
+    dfnpt = named_to_debrujin(fnpt)
     dI, dK, dS = map(named_to_debrujin, (I, K, S))
 
-    _1, _2, _3 = map(i->DeBrujinIndex(i, ind_t, GLOBAL_CONTEXT), 1:3)
-    _4 = DeBrujinIndex(4, arr2_t, GLOBAL_CONTEXT)
-    _5 = DeBrujinIndex(5, arr_t, GLOBAL_CONTEXT)
 
-    dbi(n, t) = DeBrujinIndex(n, t, GLOBAL_CONTEXT)
+    dbi(n, t) = BoundDeBrujinIndex(n, t, GLOBAL_CONTEXT)
     dbabs(st, b) = DeBrujinAbstraction(st, b, GLOBAL_CONTEXT)
     dbapp(opr, opd) = DeBrujinApplication(opr, opd, GLOBAL_CONTEXT)
 
+    _1, _2, _3 = map(i->dbi(i, ind_t), 1:3)
+    _4 = dbi(4, arr2_t)
+    _5 = dbi(5, arr_t)
+
 
     @testset "converting from named to indexed" begin
-        @test named_to_debrujin(x) isa DeBrujinIndex
-        @test type(named_to_debrujin(x)) == ind_t
-        @test named_to_debrujin(x) == _1
-        @test context(named_to_debrujin(x)) == GLOBAL_CONTEXT
+        @test named_to_debrujin(fn) isa FreeDeBrujinIndex
+        @test type(named_to_debrujin(fn)) == arr_t
+        @test named_to_debrujin(fn) == FreeDeBrujinIndex(1, arr_t, GLOBAL_CONTEXT)
+        @test context(named_to_debrujin(fn)) == GLOBAL_CONTEXT
 
-        @test dgx isa DeBrujinApplication
-        @test type(dgx) == ind_t
-        @test operator(dgx) == _5
-        @test operand(dgx) == _1
-        @test context(dgx) == GLOBAL_CONTEXT
+        @test dfnpt isa DeBrujinApplication
+        @test type(dfnpt) == ind_t
+        @test operator(dfnpt) == FreeDeBrujinIndex(1, arr_t, GLOBAL_CONTEXT)
+        @test operand(dfnpt) == FreeDeBrujinIndex(2, ind_t, GLOBAL_CONTEXT)
+        @test context(dfnpt) == GLOBAL_CONTEXT
 
 
         @test source_type(dI) == ind_t
@@ -62,7 +67,7 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
 
     @testset "alpha-equivalence" begin
         bool_t = AtomicType(:bool)
-        is_behind = Constant(:is_behind, ArrowType(ind_t, ArrowType(ind_t, bool_t)))
+        is_behind = FreeVariable(:is_behind, ArrowType(ind_t, ArrowType(ind_t, bool_t)))
         @test alpha_equivalent(I, Abstraction(y, y)) 
         @test alpha_equivalent(K, Abstraction(y, Abstraction(x, y)))
         @test alpha_equivalent(Abstraction(x, Abstraction(y,
@@ -74,9 +79,9 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
     @testset "converting from indexed to named" begin
         nI, nK, nS = map(debrujin_to_named, (dI, dK, dS))
 
-        @test alpha_equivalent(debrujin_to_named(_1), x)
+        @test alpha_equivalent(debrujin_to_named(_1), fn)
 
-        @test alpha_equivalent(debrujin_to_named(dgx), gx)
+        @test alpha_equivalent(debrujin_to_named(dfnpt), fnpt)
 
         @test type(dI) == type(I)
         @test alpha_equivalent(nI, I)
@@ -92,11 +97,12 @@ import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
         @test _1 + 2 == _3
         @test _3 - 1 == _2
         @test dI + 4 == dI
-        _2 = DeBrujinIndex(2, arr_t, GLOBAL_CONTEXT)
-        _3 = DeBrujinIndex(3, arr_t, GLOBAL_CONTEXT)
+        _2, _3 = map(x->FreeDeBrujinIndex(x, arr_t, GLOBAL_CONTEXT), (2, 3))
+        _5 = FreeDeBrujinIndex(5, arr_t, GLOBAL_CONTEXT)
+        _6 = FreeDeBrujinIndex(6, ind_t, GLOBAL_CONTEXT)
         s = dbabs(ind_t, dbapp(_2, dbapp(_2, _1)))
         t = dbabs(ind_t, dbapp(_3, dbapp(_3, _1)))
         @test s + 1 == t
-        @test dgx + 4 == dbapp(dbi(9, arr_t), dbi(5, ind_t))
+        @test dfnpt + 4 == dbapp(_5, _6)
     end
 end

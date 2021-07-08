@@ -18,70 +18,62 @@ end
 source(t::ArrowType) = t.source
 target(t::ArrowType) = t.target
 
-############################
-# Identifiers and Contexts #
-############################
+##########################
+# Variables and Contexts #
+##########################
 
 abstract type LambdaTerm end
 
-abstract type Identifier <: LambdaTerm end
+abstract type Variable <: LambdaTerm end
+
+struct Context
+    free_vars::Vector{Variable}
+end
 
 struct ContextError <: Exception
     msg::String
 end
 
-struct Context
-    identifiers::Vector{Identifier}
+struct BoundVariable <: Variable
+    name::Symbol
+    type::LambdaType
+    context::Context
 end
 
-identifiers(c::Context) = c.identifiers
+struct FreeVariable <: Variable
+    name::Symbol
+    type::LambdaType
+    context::Context
+    FreeVariable(name::Symbol, type::LambdaType, context::Context) =
+        register(context, new(name, type, context))
+end
 
-const GLOBAL_CONTEXT = Context(Identifier[])
+const GLOBAL_CONTEXT = Context(FreeVariable[])
 
-register(c::Context, i::Identifier) = (push!(c.identifiers, i); i)
+BoundVariable(name::Symbol, type::LambdaType) =
+    BoundVariable(name, type, GLOBAL_CONTEXT)
+FreeVariable(name::Symbol, type::LambdaType) =
+    FreeVariable(name, type, GLOBAL_CONTEXT)
+name(v::Variable) = v.name
+type(v::Variable) = v.type
+context(v::Variable) = v.context
+
+free_vars(c::Context) = c.free_vars
+register(c::Context, fv::FreeVariable) = (push!(c.free_vars, fv); fv)
 check_context(s, t, c::Context) =
     context(s) === context(t) === c || throw(ContextError("mismatching contexts"))
-
-struct Constant <: Identifier
-    name::Symbol
-    type::LambdaType
-    context::Context
-    Constant(name::Symbol, type::LambdaType, context::Context) =
-        register(context, new(name, type, context))
-end
-
-Constant(name::Symbol, type::LambdaType) =
-    Constant(name, type, GLOBAL_CONTEXT)
-
-struct Variable <: Identifier
-    name::Symbol
-    type::LambdaType
-    context::Context
-    Variable(name::Symbol, type::LambdaType, context::Context) =
-        register(context, new(name, type, context))
-end
-
-Variable(name::Symbol, type::LambdaType) =
-    Variable(name, type, GLOBAL_CONTEXT)
-
-name(identifier::Identifier) = identifier.name
-type(identifier::Identifier) = identifier.type
-context(identifier::Identifier) = identifier.context
-
 
 ###############
 # Abstraction #
 ###############
 
 struct Abstraction <: LambdaTerm 
-    var::Variable
+    var::BoundVariable
     body::LambdaTerm
     context::Context
-    Abstraction(var::Variable, body::LambdaTerm, context::Context) =
-        (check_context(var, body, context); new(var, body, context))
 end
 
-Abstraction(var::Variable, body::LambdaTerm) =
+Abstraction(var::BoundVariable, body::LambdaTerm) =
     Abstraction(var, body, context(var))
 
 var(abs::Abstraction) = abs.var
@@ -125,14 +117,12 @@ type(app::Application) = target(type(operator(app)))
 
 free_vars(var::Variable) = Set{Variable}((var,))
 
-free_vars(constant::Constant) = Set{Variable}()
-
 free_vars(abs::Abstraction) = setdiff(free_vars(body(abs)), (var(abs),))
 
 free_vars(app::Application) = union(free_vars(operator(app)),
                                     free_vars(operand(app)))
 
-bound_vars(var::Identifier) = Set{Variable}()
+bound_vars(var::Variable) = Set{Variable}()
 
 bound_vars(abs::Abstraction) = union(bound_vars(body(abs)), (var(abs),))
 
@@ -140,5 +130,3 @@ bound_vars(app::Application) = union(bound_vars(operator(app)),
                                      bound_vars(operand(app)))
 
 all_vars(term::LambdaTerm) = union(free_vars(term), bound_vars(term))
-
-

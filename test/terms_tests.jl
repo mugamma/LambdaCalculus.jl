@@ -1,11 +1,11 @@
 @testset "lambda terms" begin
     import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
-                           Constant, Variable, VariableReference, annotate,
+                           FreeVariable, BoundVariable, 
                            Abstraction, var, body, Application, operator,
-                           operand, LambdaTypeError, identifiers,
+                           operand, LambdaTypeError, free_vars,
                            GLOBAL_CONTEXT
    
-    empty!(identifiers(GLOBAL_CONTEXT))
+    empty!(free_vars(GLOBAL_CONTEXT))
 
     ind_t = AtomicType(:ind)
     bool_t = AtomicType(:bool)
@@ -20,9 +20,9 @@
         @test target(prop_t) == bool_t
     end
 
-    socrates = Constant(:socrates, ind_t)
-    true_ = Constant(:true_, bool_t)
-    false_ = Constant(:false_, bool_t)
+    socrates = FreeVariable(:socrates, ind_t)
+    true_ = FreeVariable(:true_, bool_t)
+    false_ = FreeVariable(:false_, bool_t)
     @testset "constants" begin
         @test name(socrates) == :socrates
         @test type(socrates) == ind_t
@@ -32,8 +32,8 @@
         @test type(false_) == bool_t
     end
 
-    person = Variable(:person, ind_t)
-    truth = Variable(:truth, bool_t)
+    person = BoundVariable(:person, ind_t)
+    truth = BoundVariable(:truth, bool_t)
     @testset "variables" begin
         @test name(person) == :person
         @test type(person) == ind_t
@@ -71,9 +71,9 @@
     @testset "combinators" begin
         arr_t = ArrowType(ind_t, ind_t)
         arr2_t = ArrowType(ind_t, ArrowType(ind_t, ind_t))
-        x, y, z = map(s->Variable(s, ind_t), (:x, :y, :z))
-        f = Variable(:f, arr2_t)
-        g = Variable(:g, arr_t)
+        x, y, z = map(s->BoundVariable(s, ind_t), (:x, :y, :z))
+        f = BoundVariable(:f, arr2_t)
+        g = BoundVariable(:g, arr_t)
 
         I = Abstraction(x, x)
         K = Abstraction(x, Abstraction(y, x))
