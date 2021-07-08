@@ -61,7 +61,6 @@ type(app::DeBrujinApplication) = target(type(operator(app)))
 # De Brujin-Indexed to Named #
 ##############################
 
-const VARORDER = [Symbol(c) for c in "xyzwuvpqrstabcdefghijklmno"]
 debrujin_to_named(t::DeBrujinLambdaTerm) = 
     _debrujin_to_named(t, Dict{Int,Variable}(enumerate(free_vars(context(t)))))
 
@@ -69,11 +68,22 @@ _debrujin_to_named(i::DeBrujinIndex, subs::Dict{Int,Variable}) = subs[idx(i)]
 _debrujin_to_named(app::DeBrujinApplication, subs::Dict{Int,Variable}) =
     Application(map(f->_debrujin_to_named(f(app), subs), (operator, operand))...)
 function _debrujin_to_named(abs::DeBrujinAbstraction, subs::Dict{Int,Variable})
-    used_vars = collect(map(name, values(subs)))
-    new_var = BoundVariable(VARORDER[findfirst(c->!(c in used_vars), VARORDER)],
-                            source_type(abs), context(abs))
+    new_var = BoundVariable(_find_name(subs), source_type(abs), context(abs))
     new_subs = setindex!(Dict{Int,Variable}((i + 1) => v for (i, v) in subs), new_var, 1)
     Abstraction(new_var, _debrujin_to_named(body(abs), new_subs), context(abs))
+end
+
+const VARORDER = "xyzwuvpqrstabcdefghijklmno"
+Base.iterate(::Val{:var_names}) = (Symbol(VARORDER[1]), (2, 1))
+Base.iterate(::Val{:var_names}, (i, rep)) =
+    (Symbol(VARORDER[i]^rep), i == length(VARORDER) ? (1, rep+1) : (i+1, rep))
+function _find_name(subs)
+    used_names = collect(map(name, values(subs)))
+    for name in Val(:var_names)
+        if !(name in used_names)
+            return name
+        end
+    end
 end
 
 ##############################
