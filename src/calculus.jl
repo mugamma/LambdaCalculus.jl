@@ -4,7 +4,7 @@
 
 alpha_equivalent(f::DeBrujinLambdaTerm, g::DeBrujinLambdaTerm) = f == g
 
-alpha_equivalent(v::Identifier, u::Identifier) = v == u
+alpha_equivalent(v::FreeVariable, u::FreeVariable) = v == u
 
 alpha_equivalent(f::Abstraction, g::Abstraction) = 
     alpha_equivalent(map(named_to_debrujin, (f, g))...)

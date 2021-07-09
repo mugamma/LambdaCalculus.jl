@@ -25,13 +25,6 @@ end
 
 Base.Pair(s::LambdaType, t::LambdaType) = ArrowType(s, t)
 
-struct VariableReference
-    name::Symbol
-end
-
-annotate(v::VariableReference, t::LambdaType) = Variable(v.name, t)
-Base.getindex(v::VariableReference, t::LambdaType) = Variable(v.name, t)
-
 lambda(var::Variable, body::LambdaTerm) = Abstraction(var, body)
 
 λ = lambda
