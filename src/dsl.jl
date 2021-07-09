@@ -13,19 +13,23 @@ macro variable(tokens...)
     names = map(token->token.args[1], tokens)
     types = map(token->token.args[2], tokens)
     Expr(:block,
-         [:($(esc(name)) = Variable(Symbol($(string(name))), $(esc(typ))))
+         [:($(esc(name)) = BoundVariable(Symbol($(string(name))), $(esc(typ))))
           for (name, typ) in zip(names, types)]...)
 end
 
-macro constant(names...)
-    #definition_macro_builder(names, Constant)
+macro free_variable(tokens...)
+    names = map(token->token.args[1], tokens)
+    types = map(token->token.args[2], tokens)
+    Expr(:block,
+         [:($(esc(name)) = FreeVariable(Symbol($(string(name))), $(esc(typ))))
+          for (name, typ) in zip(names, types)]...)
 end
 
 ≃(x, y) = alpha_equivalent(x, y)
 
 Base.Pair(s::LambdaType, t::LambdaType) = ArrowType(s, t)
 
-lambda(var::Variable, body::LambdaTerm) = Abstraction(var, body)
+lambda(var::BoundVariable, body::LambdaTerm) = Abstraction(var, body)
 
 λ = lambda
 

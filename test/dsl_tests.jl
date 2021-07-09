@@ -22,7 +22,7 @@ import LambdaCalculus: @atomic_type, @variable, λ, ≃, normalize
         @test normalize(succ(numerals[2])) ≃ numerals[3]
         @test normalize(add(numerals[2])(numerals[4])) ≃ numerals[6]
         @test normalize(add(numerals[3])(numerals[5])) ≃ numerals[8]
-        @test_broken normalize(prod(numerals[2])(numerals[4])) ≃ numerals[8]
+        @test normalize(prod(numerals[2])(numerals[4])) ≃ numerals[8]
     end
 
 
