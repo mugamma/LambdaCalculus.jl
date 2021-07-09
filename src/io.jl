@@ -2,7 +2,7 @@
 # IO #
 ######
 
-Base.string(id::Identifier) = string(name(id))
+Base.string(v::Variable) = string(name(v))
 
 Base.string(f::Abstraction) = "λ$(string(var(f))).$(string(body(f)))"
 
