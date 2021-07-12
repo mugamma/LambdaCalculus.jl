@@ -1,7 +1,7 @@
 @testset "io" begin
 
     import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
-                           Application, operator, named_to_debrujin,
+                           Application, operator, named_to_debruijn,
                            GLOBAL_CONTEXT, free_vars
     
     empty!(free_vars(GLOBAL_CONTEXT))
@@ -18,7 +18,7 @@
     S = Abstraction(f, Abstraction(g, Abstraction(z, 
            Application(Application(f, z), Application(g, z)))))
 
-    dI, dK, dS = map(named_to_debrujin, (I, K, S))
+    dI, dK, dS = map(named_to_debruijn, (I, K, S))
 
     @test string(I) == "λx.x"
     @test string(K) == "λx.λy.x"

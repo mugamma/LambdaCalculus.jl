@@ -2,7 +2,7 @@ module LambdaCalculus
 
 include("terms.jl")
 
-include("debrujin.jl")
+include("debruijn.jl")
 
 include("dsl.jl")
 

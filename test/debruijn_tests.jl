@@ -1,12 +1,12 @@
 
 import LambdaCalculus: AtomicType, ArrowType, FreeVariable, BoundVariable,
-                       Abstraction, named_to_debrujin, debrujin_to_named,
-                       source_type, body, type, FreeDeBrujinIndex,
-                       BoundDeBrujinIndex, DeBrujinAbstraction, idx, context,
-                       DeBrujinApplication, alpha_equivalent, GLOBAL_CONTEXT,
+                       Abstraction, named_to_debruijn, debruijn_to_named,
+                       source_type, body, type, FreeDeBruijnIndex,
+                       BoundDeBruijnIndex, DeBruijnAbstraction, idx, context,
+                       DeBruijnApplication, alpha_equivalent, GLOBAL_CONTEXT,
                        free_vars, LambdaTypeError, check_context
 
-@testset "De Brujin Indexing Tests" begin
+@testset "De Bruijn Indexing Tests" begin
     ind_t = AtomicType(:ind)
     arr_t = ArrowType(ind_t, ind_t)
     arr2_t = ArrowType(ind_t, ArrowType(ind_t, ind_t))
@@ -25,13 +25,13 @@ import LambdaCalculus: AtomicType, ArrowType, FreeVariable, BoundVariable,
     K = Abstraction(x, Abstraction(y, x))
     S = Abstraction(f, Abstraction(g, Abstraction(z, 
            Application(Application(f, z), Application(g, z)))))
-    dfnpt = named_to_debrujin(fnpt)
-    dI, dK, dS = map(named_to_debrujin, (I, K, S))
+    dfnpt = named_to_debruijn(fnpt)
+    dI, dK, dS = map(named_to_debruijn, (I, K, S))
 
 
-    dbi(n, t) = BoundDeBrujinIndex(n, t, GLOBAL_CONTEXT)
-    dbabs(st, b) = DeBrujinAbstraction(st, b, GLOBAL_CONTEXT)
-    dbapp(opr, opd) = DeBrujinApplication(opr, opd, GLOBAL_CONTEXT)
+    dbi(n, t) = BoundDeBruijnIndex(n, t, GLOBAL_CONTEXT)
+    dbabs(st, b) = DeBruijnAbstraction(st, b, GLOBAL_CONTEXT)
+    dbapp(opr, opd) = DeBruijnApplication(opr, opd, GLOBAL_CONTEXT)
 
     _1, _2, _3 = map(i->dbi(i, ind_t), 1:3)
     _4 = dbi(4, arr2_t)
@@ -40,15 +40,15 @@ import LambdaCalculus: AtomicType, ArrowType, FreeVariable, BoundVariable,
     @test_throws LambdaTypeError dbapp(_1, _2)
 
     @testset "converting from named to indexed" begin
-        @test named_to_debrujin(fn) isa FreeDeBrujinIndex
-        @test type(named_to_debrujin(fn)) == arr_t
-        @test named_to_debrujin(fn) == FreeDeBrujinIndex(1, arr_t, GLOBAL_CONTEXT)
-        @test context(named_to_debrujin(fn)) == GLOBAL_CONTEXT
+        @test named_to_debruijn(fn) isa FreeDeBruijnIndex
+        @test type(named_to_debruijn(fn)) == arr_t
+        @test named_to_debruijn(fn) == FreeDeBruijnIndex(1, arr_t, GLOBAL_CONTEXT)
+        @test context(named_to_debruijn(fn)) == GLOBAL_CONTEXT
 
-        @test dfnpt isa DeBrujinApplication
+        @test dfnpt isa DeBruijnApplication
         @test type(dfnpt) == ind_t
-        @test operator(dfnpt) == FreeDeBrujinIndex(1, arr_t, GLOBAL_CONTEXT)
-        @test operand(dfnpt) == FreeDeBrujinIndex(2, ind_t, GLOBAL_CONTEXT)
+        @test operator(dfnpt) == FreeDeBruijnIndex(1, arr_t, GLOBAL_CONTEXT)
+        @test operand(dfnpt) == FreeDeBruijnIndex(2, ind_t, GLOBAL_CONTEXT)
         @test context(dfnpt) == GLOBAL_CONTEXT
 
 
@@ -78,11 +78,11 @@ import LambdaCalculus: AtomicType, ArrowType, FreeVariable, BoundVariable,
     end
 
     @testset "converting from indexed to named" begin
-        nI, nK, nS = map(debrujin_to_named, (dI, dK, dS))
+        nI, nK, nS = map(debruijn_to_named, (dI, dK, dS))
 
-        @test alpha_equivalent(debrujin_to_named(_1), fn)
+        @test alpha_equivalent(debruijn_to_named(_1), fn)
 
-        @test alpha_equivalent(debrujin_to_named(dfnpt), fnpt)
+        @test alpha_equivalent(debruijn_to_named(dfnpt), fnpt)
 
         @test type(dI) == type(I)
         @test alpha_equivalent(nI, I)
@@ -98,9 +98,9 @@ import LambdaCalculus: AtomicType, ArrowType, FreeVariable, BoundVariable,
         @test _1 + 2 == _3
         @test _3 - 1 == _2
         @test dI + 4 == dI
-        _2, _3 = map(x->FreeDeBrujinIndex(x, arr_t, GLOBAL_CONTEXT), (2, 3))
-        _5 = FreeDeBrujinIndex(5, arr_t, GLOBAL_CONTEXT)
-        _6 = FreeDeBrujinIndex(6, ind_t, GLOBAL_CONTEXT)
+        _2, _3 = map(x->FreeDeBruijnIndex(x, arr_t, GLOBAL_CONTEXT), (2, 3))
+        _5 = FreeDeBruijnIndex(5, arr_t, GLOBAL_CONTEXT)
+        _6 = FreeDeBruijnIndex(6, ind_t, GLOBAL_CONTEXT)
         s = dbabs(ind_t, dbapp(_2, dbapp(_2, _1)))
         t = dbabs(ind_t, dbapp(_3, dbapp(_3, _1)))
         @test s + 1 == t

@@ -3,7 +3,7 @@
                            Abstraction, body, type, alpha_equivalent,
                            is_eta_redex, eta_reduce, is_beta_redex,
                            beta_reduce, GLOBAL_CONTEXT, free_vars,
-                           named_to_debrujin, normalize, DeBrujinApplication
+                           named_to_debruijn, normalize, DeBruijnApplication
 
     empty!(free_vars(GLOBAL_CONTEXT))
 
@@ -37,10 +37,10 @@
     prod_mn = Abstraction(n, Abstraction(m, Abstraction(g, Abstraction(x,
                 Application(Application(m, Application(n, g)), x)))))
 
-    dnumerals = map(named_to_debrujin, numerals)
-    dprod_nm, dprod_mn = map(named_to_debrujin, (prod_nm, prod_mn))
+    dnumerals = map(named_to_debruijn, numerals)
+    dprod_nm, dprod_mn = map(named_to_debruijn, (prod_nm, prod_mn))
     
-    dba(f, x) = DeBrujinApplication(f, x, GLOBAL_CONTEXT)
+    dba(f, x) = DeBruijnApplication(f, x, GLOBAL_CONTEXT)
 
     @testset "beta reduction" begin
         @test !is_beta_redex(Application(h, p))
