@@ -1,4 +1,5 @@
-import LambdaCalculus: @atomic_type, @variable, λ, ≃, normalize
+import LambdaCalculus: @atomic_type, @variable, @free_variable, @context, λ, ≃,
+                       normalize
 
 @testset "DSL tests" begin
 
@@ -23,6 +24,22 @@ import LambdaCalculus: @atomic_type, @variable, λ, ≃, normalize
         @test normalize(add(numerals[2])(numerals[4])) ≃ numerals[6]
         @test normalize(add(numerals[3])(numerals[5])) ≃ numerals[8]
         @test normalize(prod(numerals[2])(numerals[4])) ≃ numerals[8]
+    end
+
+    @testset "contexts" begin
+       @context test_context begin
+            @atomic_type T
+            arr_t = T=>T
+
+            @variable v[T] x[T]
+            @free_variable f[arr_t]
+
+            g = λ(x, λ(v, f(x)))
+        end
+
+        @test context(v) == test_context
+        @test context(x) == test_context
+        @test context(g) == test_context
     end
 
 
