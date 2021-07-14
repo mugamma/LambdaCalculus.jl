@@ -4,6 +4,13 @@
 
 abstract type LambdaType end
 
+struct Untyped <: LambdaType end
+
+const UNTYPED = Untyped()
+
+source(::Untyped) = UNTYPED
+target(::Untyped) = UNTYPED
+
 struct AtomicType <: LambdaType
     name::Symbol
 end
@@ -14,6 +21,8 @@ struct ArrowType <: LambdaType
     source::LambdaType
     target::LambdaType
 end
+
+ArrowType(::Untyped, ::Untyped) = UNTYPED
 
 source(t::ArrowType) = t.source
 target(t::ArrowType) = t.target
@@ -91,15 +100,19 @@ struct LambdaTypeError <: Exception
     msg::String
 end
 
+function type_check(operator::LambdaTerm, operand::LambdaTerm)
+    type(operator) == type(operand) == UNTYPED ||
+       (type(operator) isa ArrowType &&
+        type(operand) == source(type(operator)))
+end
+
 struct Application <: LambdaTerm
     operator::LambdaTerm
     operand::LambdaTerm
     context::Context
 
     function Application(operator::LambdaTerm, operand::LambdaTerm, context::Context)
-        if check_context(operator, operand, context) &&
-           type(operator) isa ArrowType &&
-           type(operand) == source(type(operator))
+        if check_context(operator, operand, context) && type_check(operator, operand)
             new(operator, operand, context)
         else
             throw(LambdaTypeError("type mismatch: $(type(operator)) " *

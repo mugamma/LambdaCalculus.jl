@@ -6,4 +6,5 @@ using Test
     include("calculus_tests.jl")
     include("io_tests.jl")
     include("dsl_tests.jl")
+    include("untyped_tests.jl")
 end

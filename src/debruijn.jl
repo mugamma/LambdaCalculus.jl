@@ -32,6 +32,12 @@ body(abs::DeBruijnAbstraction) = abs.body
 context(abs::DeBruijnAbstraction) = abs.context
 type(abs::DeBruijnAbstraction) = ArrowType(source_type(abs), type(body(abs)))
 
+function type_check(operator::DeBruijnLambdaTerm, operand::DeBruijnLambdaTerm)
+    type(operator) == type(operand) == UNTYPED ||
+       (type(operator) isa ArrowType &&
+        type(operand) == source(type(operator)))
+end
+
 struct DeBruijnApplication <: DeBruijnLambdaTerm
     operator::DeBruijnLambdaTerm
     operand::DeBruijnLambdaTerm
@@ -40,9 +46,7 @@ struct DeBruijnApplication <: DeBruijnLambdaTerm
     function DeBruijnApplication(operator::DeBruijnLambdaTerm,
                                  operand::DeBruijnLambdaTerm,
                                  context::Context)
-        if check_context(operator, operand, context) &&
-           type(operator) isa ArrowType &&
-           type(operand) == source(type(operator))
+        if check_context(operator, operand, context) && type_check(operator, operand)
             new(operator, operand, context)
         else
             throw(LambdaTypeError("type mismatch: $(type(operator)) " *
