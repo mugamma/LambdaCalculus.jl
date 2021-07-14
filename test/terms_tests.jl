@@ -2,8 +2,8 @@
     import LambdaCalculus: AtomicType, ArrowType, source, target, type, name,
                            FreeVariable, BoundVariable, 
                            Abstraction, var, body, Application, operator,
-                           operand, LambdaTypeError, free_vars,
-                           GLOBAL_CONTEXT
+                           operand, LambdaTypeError, free_vars, bound_vars,
+                           all_vars, GLOBAL_CONTEXT
    
     empty!(free_vars(GLOBAL_CONTEXT))
 
@@ -68,7 +68,6 @@
         @test type(socrates_is_mortal) == bool_t
     end
 
-    @testset "combinators" begin
         arr_t = ArrowType(ind_t, ind_t)
         arr2_t = ArrowType(ind_t, ArrowType(ind_t, ind_t))
         x, y, z = map(s->BoundVariable(s, ind_t), (:x, :y, :z))
@@ -80,9 +79,22 @@
         S = Abstraction(f, Abstraction(g, Abstraction(z, 
                Application(Application(f, z), Application(g, z)))))
 
+    @testset "combinators" begin
         @test type(I) == arr_t
         @test type(K) == arr2_t
         @test type(S) == ArrowType(arr2_t, ArrowType(arr_t, arr_t))
     end
-end
 
+    @testset "free and bound variables" begin
+        @test isempty(free_vars(I))
+        @test isempty(free_vars(K))
+        @test isempty(free_vars(S))
+        @test socrates in free_vars(socrates_is_mortal) 
+        @test true_ in free_vars(socrates_is_mortal) 
+        @test person in bound_vars(socrates_is_mortal)
+        @test socrates in all_vars(socrates_is_mortal) 
+        @test true_ in all_vars(socrates_is_mortal) 
+        @test person in all_vars(socrates_is_mortal)
+
+    end
+end
