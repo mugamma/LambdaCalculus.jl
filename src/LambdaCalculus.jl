@@ -4,12 +4,10 @@ include("terms.jl")
 
 include("debruijn.jl")
 
-include("dsl.jl")
-
 include("calculus.jl")
 
-include("misc.jl")
-
 include("io.jl")
+
+include("dsl.jl")
 
 end # module LambdaCalculus

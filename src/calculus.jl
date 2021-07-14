@@ -13,8 +13,6 @@ alpha_equivalent(s::Application, t::Application) =
     alpha_equivalent(operator(s), operator(t)) &&
     alpha_equivalent(operand(s), operand(t))
 
-≃(x, y) = alpha_equivalent(x, y)
-
 ###############
 # β-reduction #
 ###############

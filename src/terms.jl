@@ -30,6 +30,8 @@ struct Context
     free_vars::Vector{Variable}
 end
 
+Context() = Context(FreeVariable[])
+
 struct ContextError <: Exception
     msg::String
 end
@@ -48,7 +50,7 @@ struct FreeVariable <: Variable
         register(context, new(name, type, context))
 end
 
-const GLOBAL_CONTEXT = Context(FreeVariable[])
+const GLOBAL_CONTEXT = Context()
 
 BoundVariable(name::Symbol, type::LambdaType) =
     BoundVariable(name, type, GLOBAL_CONTEXT)
