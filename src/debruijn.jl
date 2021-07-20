@@ -2,7 +2,17 @@
 # De Bruijn Terms #
 ###################
 
+"""
+Supertype of all De Bruijn-indexed lambda terms.
+"""
 abstract type DeBruijnLambdaTerm end
+
+"""
+Abstract type for De Bruijn indices.
+
+Each actual index object is either a `FreeDeBruijnIndex` or
+`BoundDeBruijnIndex`.
+"""
 abstract type DeBruijnIndex <: DeBruijnLambdaTerm end
 
 struct BoundDeBruijnIndex <: DeBruijnIndex
@@ -17,16 +27,28 @@ struct FreeDeBruijnIndex <: DeBruijnIndex
     context::Context
 end
 
+"""
+    idx(idx::DeBruijnIndex)
+
+Return the numeric value of index of the `DeBruijnIndex` object `idx`.
+"""
 idx(idx::DeBruijnIndex) = idx.i
+
 type(idx::DeBruijnIndex) = idx.type
 context(idx::DeBruijnIndex) = idx.context
 
+"""
+A De Bruijn-indexed abstraction term.
+"""
 struct DeBruijnAbstraction <: DeBruijnLambdaTerm
     source_type::LambdaType
     body::DeBruijnLambdaTerm
     context::Context
 end
 
+"""
+Return the domain type of the abstraction `abs`.
+"""
 source_type(abs::DeBruijnAbstraction) = abs.source_type
 body(abs::DeBruijnAbstraction) = abs.body
 context(abs::DeBruijnAbstraction) = abs.context

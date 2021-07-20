@@ -2,15 +2,33 @@
 # Types #
 #########
 
+"""
+The supertype of the type ojbects of lambda terms.
+"""
 abstract type LambdaType end
 
+"""
+The singleton type representing the type of terms in untyped lambda calculus.
+
+`Untyped` has a single instance (accessible as `UNTYPED`) which has the property
+that a lambda term is of type `UNTYPED` if and only if it is of type
+`ArrowType(UNTYPED,UNTYPED)`.
+"""
 struct Untyped <: LambdaType end
 
+"""
+The type of the terms in untyped lambda calculus.
+
+The only instance of `Untyped`.
+"""
 const UNTYPED = Untyped()
 
 source(::Untyped) = UNTYPED
 target(::Untyped) = UNTYPED
 
+"""
+The basic type of a term.
+"""
 struct AtomicType <: LambdaType
     name::Symbol
 end
@@ -73,6 +91,22 @@ free_vars(c::Context) = c.free_vars
 register(c::Context, fv::FreeVariable) = (push!(c.free_vars, fv); fv)
 check_context(s, t, c::Context) =
     context(s) === context(t) === c || throw(ContextError("mismatching contexts"))
+
+
+"""
+    type(t::Union{LambdaTerm,DeBruijnLambdaTerm})
+
+Return the type associated with the lambda term `t`.
+"""
+function type end
+
+"""
+    context(t::Union{LambdaTerm,DeBruijnLambdaTerm})
+
+Return the context of evaluation for the lambda term `t`.
+"""
+function context end
+
 
 ###############
 # Abstraction #
