@@ -28,6 +28,11 @@
     @test string(dK) == "λ λ 2"
     @test string(dS) == "λ λ λ ((3 1) (2 1))"
 
+    @test string(ind_t) == "ind_t"
+    @test string(arr_t) == "ind_t => ind_t"
+    @test string(arr2_t) == "ind_t => ind_t => ind_t"
+    @test string(ArrowType(arr_t, ind_t)) == "(ind_t => ind_t) => ind_t"
+
     buf = IOBuffer()
 
     show(buf, MIME("text/plain"), I)
