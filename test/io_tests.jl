@@ -1,24 +1,24 @@
 @testset "io" begin
 
     import LambdaCalculus: AtomicType, ArrowType, Variable, Abstraction,
-                           Application, operator, named_to_debrujin,
-                           GLOBAL_CONTEXT, identifiers
+                           Application, operator, named_to_debruijn,
+                           GLOBAL_CONTEXT, free_vars
     
-    empty!(identifiers(GLOBAL_CONTEXT))
+    empty!(free_vars(GLOBAL_CONTEXT))
 
     ind_t = AtomicType(:ind_t)
     arr_t = ArrowType(ind_t, ind_t)
     arr2_t = ArrowType(ind_t, ArrowType(ind_t, ind_t))
-    x, y, z = map(s->Variable(s, ind_t), (:x, :y, :z))
-    f = Variable(:f, arr2_t)
-    g = Variable(:g, arr_t)
+    x, y, z = map(s->BoundVariable(s, ind_t), (:x, :y, :z))
+    f = BoundVariable(:f, arr2_t)
+    g = BoundVariable(:g, arr_t)
 
     I = Abstraction(x, x)
     K = Abstraction(x, Abstraction(y, x))
     S = Abstraction(f, Abstraction(g, Abstraction(z, 
            Application(Application(f, z), Application(g, z)))))
 
-    dI, dK, dS = map(named_to_debrujin, (I, K, S))
+    dI, dK, dS = map(named_to_debruijn, (I, K, S))
 
     @test string(I) == "λx.x"
     @test string(K) == "λx.λy.x"
@@ -50,4 +50,3 @@
     @test String(take!(buf)) == "λ λ λ ((3 1) (2 1))"
 
 end
-
